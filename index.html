@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!-- 이 파일이 HTML 문서라는 것을 브라우저에게 알려 줘요. -->
+<html lang="ko">
+<!-- lang="ko": 이 페이지의 내용이 한국어라는 뜻이에요. -->
+
+<head>
+  <!-- head: 화면에는 안 보이지만 페이지에 필요한 정보를 적는 곳이에요. -->
+
+  <!-- 한글이 깨지지 않도록 글자 인코딩을 UTF-8로 정해요. -->
+  <meta charset="UTF-8">
+
+  <!-- 휴대폰에서도 화면 크기에 맞게 보이도록 설정해요. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- 브라우저 탭에 표시되는 제목이에요. -->
+  <title>숫자 카운터</title>
+
+  <!-- style 안에는 CSS를 써요. CSS는 페이지의 "옷"(색, 크기, 위치)을 정해요. -->
+  <style>
+    /* "*"는 모든 요소를 뜻해요. 브라우저마다 다른 기본 여백을 없애서 똑같이 보이게 해요. */
+    * {
+      box-sizing: border-box; /* 테두리와 안쪽 여백까지 포함해서 크기를 계산해요. */
+      margin: 0;              /* 바깥 여백 없애기 */
+      padding: 0;             /* 안쪽 여백 없애기 */
+    }
+
+    /* body: 페이지 전체 영역이에요. */
+    body {
+      min-height: 100vh;       /* 높이를 최소 화면 전체(100%)로 해요. */
+      display: flex;           /* flex를 쓰면 안의 내용을 쉽게 정렬할 수 있어요. */
+      align-items: center;     /* 위아래 가운데 정렬 */
+      justify-content: center; /* 왼쪽오른쪽 가운데 정렬 */
+      font-family: "Pretendard", "Malgun Gothic", system-ui, sans-serif; /* 글꼴 (앞에 있는 것부터 써 봐요) */
+      background: #f4f5f7;     /* 배경색: 연한 회색 */
+      color: #1f2328;          /* 글자색: 거의 검은색 */
+    }
+
+    /* .card: class="card"인 요소, 즉 가운데 흰 상자예요. */
+    .card {
+      width: min(320px, calc(100% - 32px)); /* 최대 320px, 화면이 좁으면 양옆 16px씩 남기고 줄어들어요. */
+      padding: 40px 24px;      /* 안쪽 여백: 위아래 40px, 좌우 24px */
+      text-align: center;      /* 글자를 가운데 정렬 */
+      background: #ffffff;     /* 흰색 배경 */
+      border-radius: 16px;     /* 모서리를 둥글게 */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* 살짝 그림자를 줘서 떠 있는 느낌을 내요. */
+    }
+
+    /* h1: "숫자 카운터" 제목 */
+    h1 {
+      font-size: 18px;         /* 글자 크기 */
+      font-weight: 600;        /* 글자 굵기 (숫자가 클수록 굵어요) */
+      color: #57606a;          /* 회색 글자 */
+    }
+
+    /* #count: id="count"인 요소, 즉 큰 숫자예요. ("#"은 id, "."은 class를 뜻해요.) */
+    #count {
+      margin: 16px 0 28px;     /* 바깥 여백: 위 16px, 좌우 0, 아래 28px */
+      font-size: 72px;         /* 아주 큰 글자 */
+      font-weight: 700;        /* 굵게 */
+      font-variant-numeric: tabular-nums; /* 숫자 폭을 똑같이 맞춰서 숫자가 바뀔 때 흔들리지 않게 해요. */
+    }
+
+    /* button: "+1 올리기" 버튼 */
+    button {
+      width: 100%;             /* 상자 너비를 꽉 채워요. */
+      padding: 14px;           /* 버튼 안쪽 여백 */
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;          /* 흰 글자 */
+      background: #2563eb;     /* 파란 배경 */
+      border: none;            /* 기본 테두리 없애기 */
+      border-radius: 10px;     /* 둥근 모서리 */
+      cursor: pointer;         /* 마우스를 올리면 손가락 모양이 돼요. */
+      transition: background 0.15s, transform 0.05s; /* 색과 크기가 부드럽게 바뀌도록 해요. */
+    }
+
+    /* :hover → 마우스를 버튼 위에 올렸을 때 */
+    button:hover {
+      background: #1d4ed8;     /* 조금 더 진한 파랑 */
+    }
+
+    /* :active → 버튼을 누르고 있는 순간 */
+    button:active {
+      transform: scale(0.97);  /* 97% 크기로 살짝 줄어들어서 "눌린" 느낌을 줘요. */
+    }
+
+    /* :focus-visible → 키보드(Tab 키)로 버튼을 선택했을 때 */
+    button:focus-visible {
+      outline: 3px solid #93c5fd; /* 하늘색 테두리로 지금 선택된 곳을 보여 줘요. */
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- body: 실제로 화면에 보이는 내용이에요. -->
+
+  <!-- main: 페이지의 핵심 내용. class="card"로 위에서 만든 흰 상자 스타일을 입혀요. -->
+  <main class="card">
+    <!-- 제목 -->
+    <h1>숫자 카운터</h1>
+
+    <!-- 숫자를 보여 주는 곳. id="count"는 JavaScript가 이 요소를 찾을 때 쓰는 "이름표"예요. -->
+    <!-- aria-live="polite": 화면 읽기 프로그램이 숫자가 바뀔 때 읽어 줘요. (시각장애인을 위한 배려) -->
+    <p id="count" aria-live="polite">0</p>
+
+    <!-- 누르면 숫자가 올라가는 버튼. id="increment"도 JavaScript가 찾을 때 쓰는 이름표예요. -->
+    <button id="increment" type="button">+1 올리기</button>
+  </main>
+
+  <!-- script 안에는 JavaScript를 써요. JavaScript는 페이지를 "움직이게" 하는 역할이에요. -->
+  <script>
+    // 1) 이름표(id)로 화면의 요소를 찾아서 변수에 담아 둬요.
+    const countEl = document.getElementById("count");     // 숫자가 적힌 <p>
+    const button = document.getElementById("increment");  // "+1 올리기" 버튼
+
+    // 2) 현재 숫자를 기억할 변수예요. 처음에는 0이에요.
+    //    (const는 바뀌지 않는 값, let은 나중에 바뀔 수 있는 값에 써요.)
+    let count = 0;
+
+    // 3) 버튼에 "클릭되면 이 일을 해 줘"라고 등록해요. (이걸 '이벤트 리스너'라고 해요.)
+    button.addEventListener("click", () => {
+      count += 1;                  // 숫자를 1 늘려요. (count = count + 1 과 같아요.)
+      countEl.textContent = count; // 늘어난 숫자를 화면의 <p>에 다시 써 넣어요.
+    });
+  </script>
+</body>
+</html>
