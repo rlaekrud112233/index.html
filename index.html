@@ -31,8 +31,9 @@
       align-items: center;     /* 위아래 가운데 정렬 */
       justify-content: center; /* 왼쪽오른쪽 가운데 정렬 */
       font-family: "Pretendard", "Malgun Gothic", system-ui, sans-serif; /* 글꼴 (앞에 있는 것부터 써 봐요) */
-      background: #f4f5f7;     /* 배경색: 연한 회색 */
+      background: #f4f5f7;     /* 배경색: 연한 회색 (JavaScript가 누를 때마다 바꿔요) */
       color: #1f2328;          /* 글자색: 거의 검은색 */
+      transition: background 0.4s; /* 배경색이 휙 바뀌지 않고 부드럽게 바뀌게 해요. */
     }
 
     /* .card: class="card"인 요소, 즉 가운데 흰 상자예요. */
@@ -54,13 +55,29 @@
 
     /* #count: id="count"인 요소, 즉 큰 숫자예요. ("#"은 id, "."은 class를 뜻해요.) */
     #count {
-      margin: 16px 0 28px;     /* 바깥 여백: 위 16px, 좌우 0, 아래 28px */
+      margin: 16px 0 12px;     /* 바깥 여백: 위 16px, 좌우 0, 아래 12px */
       font-size: 72px;         /* 아주 큰 글자 */
       font-weight: 700;        /* 굵게 */
       font-variant-numeric: tabular-nums; /* 숫자 폭을 똑같이 맞춰서 숫자가 바뀔 때 흔들리지 않게 해요. */
     }
 
-    /* button: "+1 올리기" 버튼 */
+    /* #message: 10이 되었을 때 나오는 축하 메시지 */
+    #message {
+      min-height: 28px;        /* 메시지가 없어도 자리를 남겨 둬서, 나타날 때 버튼이 아래로 밀리지 않게 해요. */
+      margin-bottom: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #b45309;          /* 진한 주황색 글자 */
+    }
+
+    /* 버튼들을 세로로 쌓아 주는 묶음 */
+    .buttons {
+      display: flex;
+      flex-direction: column;  /* 세로 방향으로 쌓아요. */
+      gap: 10px;               /* 버튼 사이 간격 */
+    }
+
+    /* button: 모든 버튼에 공통으로 적용되는 모양 */
     button {
       width: 100%;             /* 상자 너비를 꽉 채워요. */
       padding: 14px;           /* 버튼 안쪽 여백 */
@@ -89,6 +106,22 @@
       outline: 3px solid #93c5fd; /* 하늘색 테두리로 지금 선택된 곳을 보여 줘요. */
       outline-offset: 2px;
     }
+
+    /* #double: ✖️ 2배 버튼은 보라색으로 */
+    #double {
+      background: #7c3aed;
+    }
+    #double:hover {
+      background: #6d28d9;
+    }
+
+    /* #reset: 🔄 초기화 버튼은 회색으로 (파랑·보라와 구분해요) */
+    #reset {
+      background: #6b7280;
+    }
+    #reset:hover {
+      background: #4b5563;
+    }
   </style>
 </head>
 
@@ -104,24 +137,75 @@
     <!-- aria-live="polite": 화면 읽기 프로그램이 숫자가 바뀔 때 읽어 줘요. (시각장애인을 위한 배려) -->
     <p id="count" aria-live="polite">0</p>
 
-    <!-- 누르면 숫자가 올라가는 버튼. id="increment"도 JavaScript가 찾을 때 쓰는 이름표예요. -->
-    <button id="increment" type="button">+1 올리기</button>
+    <!-- 축하 메시지 자리. 처음에는 비어 있고, 숫자가 10이 되면 JavaScript가 글자를 채워 넣어요. -->
+    <p id="message" aria-live="polite"></p>
+
+    <!-- 버튼 세 개. 각각 id(이름표)가 있어서 JavaScript가 찾을 수 있어요. -->
+    <div class="buttons">
+      <button id="increment" type="button">+1 올리기</button>
+      <button id="double" type="button">✖️ 2배</button>
+      <button id="reset" type="button">🔄 초기화</button>
+    </div>
   </main>
 
   <!-- script 안에는 JavaScript를 써요. JavaScript는 페이지를 "움직이게" 하는 역할이에요. -->
   <script>
     // 1) 이름표(id)로 화면의 요소를 찾아서 변수에 담아 둬요.
-    const countEl = document.getElementById("count");     // 숫자가 적힌 <p>
-    const button = document.getElementById("increment");  // "+1 올리기" 버튼
+    const countEl = document.getElementById("count");        // 숫자가 적힌 <p>
+    const messageEl = document.getElementById("message");    // 축하 메시지가 나올 <p>
+    const incrementBtn = document.getElementById("increment"); // "+1 올리기" 버튼
+    const doubleBtn = document.getElementById("double");       // "2배" 버튼
+    const resetBtn = document.getElementById("reset");         // "초기화" 버튼
 
     // 2) 현재 숫자를 기억할 변수예요. 처음에는 0이에요.
     //    (const는 바뀌지 않는 값, let은 나중에 바뀔 수 있는 값에 써요.)
     let count = 0;
 
-    // 3) 버튼에 "클릭되면 이 일을 해 줘"라고 등록해요. (이걸 '이벤트 리스너'라고 해요.)
-    button.addEventListener("click", () => {
-      count += 1;                  // 숫자를 1 늘려요. (count = count + 1 과 같아요.)
-      countEl.textContent = count; // 늘어난 숫자를 화면의 <p>에 다시 써 넣어요.
+    // 처음 배경색을 기억해 둬요. 초기화 버튼을 누르면 이 색으로 돌아와요.
+    const defaultBackground = "#f4f5f7";
+
+    // 3) 화면을 최신 상태로 고쳐 주는 함수예요.
+    //    숫자가 어떻게 바뀌든, 마지막에 이 함수를 부르면 화면이 맞춰져요.
+    function render() {
+      countEl.textContent = count; // 숫자를 화면에 써 넣어요.
+
+      // 숫자가 정확히 10일 때만 축하 메시지를 보여 주고, 아니면 지워요.
+      if (count === 10) {
+        messageEl.textContent = "🏆 축하해요! 10을 달성했어요! 🎉";
+      } else {
+        messageEl.textContent = "";
+      }
+    }
+
+    // 4) 배경색을 무작위로 바꾸는 함수예요.
+    function changeBackground() {
+      // 색상(hue)은 0~359 사이의 무작위 숫자예요. (무지개 색 중 하나를 고르는 것과 같아요.)
+      const hue = Math.floor(Math.random() * 360);
+      // hsl(색상, 채도, 밝기): 밝기를 90%로 높여서 글자가 잘 보이는 연한 색만 나오게 해요.
+      document.body.style.background = "hsl(" + hue + ", 80%, 90%)";
+    }
+
+    // 5) 버튼마다 "클릭되면 이 일을 해 줘"라고 등록해요. (이걸 '이벤트 리스너'라고 해요.)
+
+    // +1 버튼: 숫자를 1 늘리고 배경색을 바꿔요.
+    incrementBtn.addEventListener("click", () => {
+      count += 1;          // 숫자를 1 늘려요. (count = count + 1 과 같아요.)
+      changeBackground();  // 배경색 바꾸기
+      render();            // 화면 새로 그리기
+    });
+
+    // 2배 버튼: 숫자를 2배로 만들고 배경색을 바꿔요.
+    doubleBtn.addEventListener("click", () => {
+      count *= 2;          // 숫자에 2를 곱해요. (count = count * 2 와 같아요.)
+      changeBackground();
+      render();
+    });
+
+    // 초기화 버튼: 숫자를 0으로 되돌리고, 배경색도 처음 색으로 되돌려요.
+    resetBtn.addEventListener("click", () => {
+      count = 0;
+      document.body.style.background = defaultBackground;
+      render();
     });
   </script>
 </body>
